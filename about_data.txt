@@ -1,0 +1,45 @@
+#
+class = {'cat'	,	'dog'	}
+label = {0		,	1		}
+
+
+# No. of data
+All
+train	- 20000
+val		- 5000
+
+num of cat data = 12500
+train	- 10000
+val		- 2500
+
+num of dog data = 12500
+train	- 10000
+val		- 2500
+
+
+# Image size
+('min_width : ', 42)
+('min_height : ', 32)
+
+('max_width : ', 1050)
+('max_height : ', 1050)
+
+('min_width_name : ', 'dog.10733.jpg')
+('min_height_name : ', 'cat.6402.jpg')
+
+('width mean : ', 404)
+('height mean : ', 360)
+
+('Number of 42 <= width < 50 or 32 <= height < 50 image' : 18)
+
+('Number of 50 <= width < 256 or 50 <= height < 256 image' : 7063)
+
+('Number of width or height < 64 imge' : 41)
+
+# Image mean & std
+
+('mean : ', array([ 106.20716189,  115.92827343,  124.40552939]))
+('std  : ', array([ 65.5968272 ,  64.94896773,  66.61022177]))
+
+
+
