@@ -49,7 +49,8 @@ def main():
     
 #   Data loading code
     traindir = os.path.join(data_root, 'train')
-    valdioin(data_root, 'val')
+    valdir = os.path.join(data_root, 'val')
+    testdir = os.path.join(data_root, 'train')
 
     mean = [106.2072 / 255, 115.9283 / 255, 124.4055 / 255]
     std = [65.5968 / 255, 64.9490 / 255, 66.6102 / 255]
@@ -88,6 +89,8 @@ def main():
                     num_workers=8,\
                     pin_memory=True)
 
+    for epoch in range(1):
+        test(train_loader, model, criterion, optimizer, epoch)
 
     for epoch in range(130):
         adjust_learning_rate(optimizer, epoch)
@@ -155,14 +158,6 @@ def train(train_loader, model, criterion, optimizer, epoch):
         output = model(input_var)
         loss = criterion(output, target_var)
 
-        # hard example mining
-#        _, pred = torch.max(output.data, 1)
-#        correct = pred.eq(target).sum()
-#        print(output.data.size())
-#        print(pred.size())
-#        print(target.size())
-#        #print(pred)
-#        pdb.set_trace()
         
 
         # measure accuracy and record loss
@@ -246,6 +241,65 @@ def validate(val_loader, model, criterion):
     return top1.avg
 
 
+def test(test_loader, model, criterion):
+    batch_time = AverageMeter()
+    losses = AverageMeter()
+    top1 = AverageMeter()
+
+    # switch to evaluate mode
+    model.eval()
+
+    end = time.time()
+    for i, (input, target) in enumerate(test_loader):
+
+#        input_ary = input.numpy()
+#        input_sqz = np.squeeze(input_ary).T
+#        input_shape = input_sqz.shape
+#        print(input_shape) 
+#        exit() 
+
+        target = target.cuda(async=True)
+        input_var = torch.autograd.Variable(input, volatile=True)
+        target_var = torch.autograd.Variable(target, volatile=True)
+
+        # compute output
+        output = model(input_var)
+        loss = criterion(output, target_var)
+
+        # hard example mining
+        _, pred = torch.max(output.data, 1)
+        pdb.set_trace()
+#        correct = pred.eq(target).sum()
+#        print(output.data.size())
+#        print(pred.size())
+#        print(target.size())
+#        #print(pred)
+#        pdb.set_trace()
+
+        # measure accuracy and record loss
+        prec1 = accuracy(output.data, target)
+        losses.update(loss.data[0], input.size(0))
+        top1.update(prec1, input.size(0))
+
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        print_freq = 25 
+        if i % print_freq == 0:
+            print('Test: [{0}/{1}]\t'
+                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'.format(
+                   i, len(val_loader), batch_time=batch_time, loss=losses,
+                   top1=top1))
+
+    print(' * Prec@1 {top1.avg:.3f} '
+          .format(top1=top1))
+
+    return top1.avg
+
+
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
     if is_best:
@@ -291,6 +345,7 @@ def accuracy(output, target):
 
 
 if __name__=='__main__':
+
     main()
 
 
