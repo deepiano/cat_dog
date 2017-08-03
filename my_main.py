@@ -285,7 +285,7 @@ def accuracy(output, target):
 
     _, pred = torch.max(output, 1)
     correct = pred.eq(target).sum()
-   res = correct * 100 / float(batch_size)
+    res = correct * 100 / float(batch_size)
 
     return res
 
