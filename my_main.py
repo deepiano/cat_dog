@@ -89,7 +89,7 @@ def main():
                     pin_memory=True)
 
 
-    for epoch in range(91):
+    for epoch in range(40):
         adjust_learning_rate(optimizer, epoch)
 
         # train for one epoch
