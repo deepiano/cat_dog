@@ -49,7 +49,7 @@ def main():
     
 #   Data loading code
     traindir = os.path.join(data_root, 'train')
-    valdioin(data_root, 'val')
+    valdir = os.path.join(data_root, 'val')
 
     mean = [106.2072 / 255, 115.9283 / 255, 124.4055 / 255]
     std = [65.5968 / 255, 64.9490 / 255, 66.6102 / 255]
