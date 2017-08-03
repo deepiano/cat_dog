@@ -32,7 +32,8 @@ parser.add_argument('--resume', default='', type=str, metavar='PATH',
 
 data_root = '/mnt/nfs/bong/MyProject/cat_dog/data'
 
-best_prec1= 95.0
+best_prec1 = 0
+
 
 def main():
 
@@ -122,29 +123,71 @@ def main():
                     num_workers=8,\
                     pin_memory=True)
 
-    for epoch in range(1):
-        test(train_loader, model, criterion)
+#    for epoch in range(1):
+#        test(train_loader, model, criterion)
+#
+#    exit()
 
-    exit()
+    # ensemble
+    models = []
+    models.append(model)
+    best_precs = [0,]
+    predictions = []
 
-    for epoch in range(130):
+    for i in range(9):
+
+        model_ = my_densenet.densenet121(pretrained=False, num_classes=2)
+        model_ = torch.nn.DataParallel(model_).cuda()
+        models.append(model_)
+        best_precs.append(0)
+
+    for epoch in range(5):
+
         adjust_learning_rate(optimizer, epoch)
 
-        # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch)
+        for i, m in enumerate(models):
+   
+            filename = './checkpoint/checkpoint' + str(i) + '.pth.tar'
+            model_filename = './model_best/model_best' + str(i) + '.pth.tar'
+    
+            # train for one epoch
+            train(train_loader, m, criterion, optimizer, epoch)
+    
+            # evaluate on validation set
+            prec = validate(val_loader, m, criterion)
+    
+            is_best = prec > best_precs[i]
+            best_prec = max(prec1, best_precs[i])
+            save_checkpoint({
+                'epoch': epoch + 1,
+                'arch': arch,
+                'state_dict': m.state_dict(),
+                'best_prec1': best_prec,
+                'optimizer' : optimizer.state_dict(),
+                },\
+                is_best,\
+                filename=filename,\
+                model_filename=model_filename)
 
-        # evaluate on validation set
-        prec1= validate(val_loader, model, criterion)
-
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
-        save_checkpoint({
-            'epoch': epoch + 1,
-            'arch': arch,
-            'state_dict': model.state_dict(),
-            'best_prec1': best_prec1,
-            'optimizer' : optimizer.state_dict(),
-            }, is_best)
+#            m.eval()
+#        
+#            for i, (input, target) in enumerate(val_loader):
+#        
+#                target = target.cuda(async=True)
+#                input_var = torch.autograd.Variable(input, volatile=True)
+#                target_var = torch.autograd.Variable(target, volatile=True)
+#        
+#                # compute output
+#                output = m(input_var)
+#        
+#                _, pred = torch.max(output.data, 1)
+#                
+#
+#                # measure accuracy and record loss
+#                prec1 = accuracy(output.data, target)
+#                losses.update(loss.data[0], input.size(0))
+#                top1.update(prec1, input.size(0))
+        
 
 #    for i, (input, target) in enumerate(train_loader):
      
@@ -197,7 +240,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        print_freq = 20 
+        print_freq = 90 
         if i % print_freq == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -249,7 +292,7 @@ def validate(val_loader, model, criterion):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        print_freq = 25 
+        print_freq = 40 
         if i % print_freq == 0:
             print('Test: [{0}/{1}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -284,16 +327,16 @@ def test(test_loader, model, criterion):
         loss = criterion(output, target_var)
 
         # hard example mining
-        _, pred = torch.max(output.data, 1)
-        equal_mask = pred.eq(target).cpu().numpy()
-        false_index = np.where(equal_mask == False)[0]
+#        _, pred = torch.max(output.data, 1)
+#        equal_mask = pred.eq(target).cpu().numpy()
+#        false_index = np.where(equal_mask == False)[0]
         
-        for i in false_index:
-            print('index : ', i)
-            print('output: ', output[i])
-            print('target: ', target[i])
-            print('image path: ', test_loader.dataset.imgs[i])
-            pdb.set_trace()
+#        for i in false_index:
+#            print('index : ', i)
+#            print('output: ', output[i])
+#            print('target: ', target[i])
+#            print('image path: ', test_loader.dataset.imgs[i])
+#            pdb.set_trace()
 
         # measure accuracy and record loss
         prec1 = accuracy(output.data, target)
@@ -319,10 +362,14 @@ def test(test_loader, model, criterion):
     return top1.avg
 
 
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
+def save_checkpoint(state, is_best,\
+                    filename='checkpoint.pth.tar',\
+                    model_filename='model_best.pth.tar'):
+
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+        #shutil.copyfile(filename, 'model_best.pth.tar')
+        shutil.copyfile(filename, model_filename)
 
 
 class AverageMeter(object):
