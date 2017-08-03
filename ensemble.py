@@ -147,8 +147,8 @@ def main():
 
         for i, m in enumerate(models):
    
-            print('model ', i '..')
-            
+            print('model ' + str(i))
+           
             filename = './checkpoint/checkpoint' + str(i) + '.pth.tar'
             model_filename = './model_best/model_best' + str(i) + '.pth.tar'
     
