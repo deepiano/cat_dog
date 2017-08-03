@@ -16,6 +16,23 @@ model_urls = {
     'densenet161': 'https://download.pytorch.org/models/densenet161-17b70270.pth',
 }
 
+def densenet_small(pretrained=False, **kwargs):
+
+    model = DenseNet(num_init_features=64, growth_rate=16, \
+            block_config=(6, 12, 12, 8),
+                     **kwargs)
+    if pretrained:
+        model.load_state_dict(model_zoo.load_url(model_urls['densenet121']))
+    return model
+
+def densenet_mid(pretrained=False, **kwargs):
+
+    model = DenseNet(num_init_features=64, growth_rate=32, \
+            block_config=(6, 12, 18, 12),
+                     **kwargs)
+    if pretrained:
+        model.load_state_dict(model_zoo.load_url(model_urls['densenet121']))
+    return model
 
 def densenet121(pretrained=False, **kwargs):
     r"""Densenet-121 model from
