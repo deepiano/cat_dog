@@ -134,7 +134,7 @@ def main():
     best_precs = [0,]
     predictions = []
 
-    for i in range(9):
+    for i in range(8):
 
         model_ = my_densenet.densenet121(pretrained=False, num_classes=2)
         model_ = torch.nn.DataParallel(model_).cuda()
@@ -147,6 +147,8 @@ def main():
 
         for i, m in enumerate(models):
    
+            print('model ', i '..')
+            
             filename = './checkpoint/checkpoint' + str(i) + '.pth.tar'
             model_filename = './model_best/model_best' + str(i) + '.pth.tar'
     
