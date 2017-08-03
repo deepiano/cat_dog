@@ -69,7 +69,7 @@ def main():
                     train_data,\
                     batch_size=200,\
                     shuffle=True,\
-                    num_workers=8,\
+                    num_workers=24,\
                     pin_memory=True)
     
     val_transform = transforms.Compose([\
@@ -85,11 +85,11 @@ def main():
                     val_data,\
                     batch_size=100,\
                     shuffle=False,\
-                    num_workers=8,\
+                    num_workers=24,\
                     pin_memory=True)
 
 
-    for epoch in range(100):
+    for epoch in range(91):
         adjust_learning_rate(optimizer, epoch)
 
         # train for one epoch
@@ -285,7 +285,7 @@ def accuracy(output, target):
 
     _, pred = torch.max(output, 1)
     correct = pred.eq(target).sum()
-    res = correct * 100 / float(batch_size)
+   res = correct * 100 / float(batch_size)
 
     return res
 
