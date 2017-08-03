@@ -27,7 +27,7 @@ import my_densenet
 
 data_root = '/mnt/nfs/bong/MyProject/cat_dog/data'
 
-best_prec1= 97.0
+best_prec1= 0
 
 def main():
 
@@ -89,7 +89,7 @@ def main():
                     pin_memory=True)
 
 
-    for epoch in range(130):
+    for epoch in range(100):
         adjust_learning_rate(optimizer, epoch)
 
         # train for one epoch
