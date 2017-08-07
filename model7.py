@@ -26,7 +26,7 @@ import my_densenet
 import my_resnet
 #import my_transform
 
-data_root = '/mnt/nfs/bong/MyProject/cat_dog/data'
+data_root = './data'
 
 best_prec1= 0
 
@@ -250,7 +250,7 @@ def validate(val_loader, model, criterion):
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+        shutil.copyfile(filename, './model_best/model_best7.pth.tar')
 
 
 class AverageMeter(object):
